@@ -1,23 +1,8 @@
 #include "ndvector.h"
 
-#include <gsl/gsl_vector.h>
-
-struct ees_ndvector
+struct ndvector* ndvector_alloc(size_t dimensions, size_t* sizes)
 {
-        int dimensions;
-        gsl_vector* sizes;
-        gsl_vector* data;
-};
-
-struct ees_eikonal_data {
-        struct ees_ndvector velocites;
-        struct ees_ndvector curr_solve;
-};
-
-
-struct ees_ndvector* ees_ndvector_alloc(size_t dimensions, size_t* sizes)
-{
-        struct ees_ndvector *nv = malloc(sizeof(struct ees_ndvector));
+        struct ndvector *nv = malloc(sizeof(struct ndvector));
         nv->dimensions = dimensions;
         nv->sizes = gsl_vector_alloc(dimensions);
         size_t phys_dim = 1;
@@ -29,9 +14,9 @@ struct ees_ndvector* ees_ndvector_alloc(size_t dimensions, size_t* sizes)
 	return nv;
 }
 
-struct ees_ndvector* ees_ndvector_calloc(size_t dimensions, size_t* sizes)
+struct ndvector* ndvector_calloc(size_t dimensions, size_t* sizes)
 {
-        struct ees_ndvector *nv = malloc(sizeof(struct ees_ndvector));
+        struct ndvector *nv = malloc(sizeof(struct ndvector));
         nv->dimensions = dimensions;
         nv->sizes = gsl_vector_alloc(dimensions);
         size_t phys_dim = 1;
@@ -51,7 +36,7 @@ int coords_to_vec(gsl_vector* sizes, size_t dimensions, size_t* vec)
         for (int i = 1; i < dimensions; i++) {
                 if (vec[dimensions - 1 - i] < 0 ||
                     vec[dimensions - 1 - i] >= gsl_vector_get(sizes, dimensions - 1 - i)){
-                        printf("EES: boundary error %d not in [0,%d]\n",vec[i],sizes[i]);
+                        printf("EES: %d size boundary error %d not in [0,%d]\n", i, vec[i], sizes[i]);
                         exit(EXIT_FAILURE);
                 }
                 mult_coord *= gsl_vector_get(sizes, dimensions - 1 - i + 1);
@@ -63,7 +48,7 @@ int coords_to_vec(gsl_vector* sizes, size_t dimensions, size_t* vec)
 }
 
 
-double ees_ndvector_get(struct ees_ndvector* nvec,
+double ndvector_get(struct ndvector* nvec,
                         size_t* vec)
 {
 //        printf("get::");
@@ -71,7 +56,7 @@ double ees_ndvector_get(struct ees_ndvector* nvec,
         return gsl_vector_get(nvec->data, real_coord);
 }
 
-void ees_ndvector_set(struct ees_ndvector* nvec,
+void ndvector_set(struct ndvector* nvec,
                       size_t* vec,
                       double val)
 {
@@ -82,12 +67,21 @@ void ees_ndvector_set(struct ees_ndvector* nvec,
 
 
 
-size_t ees_ndvector_dimensions(struct ees_ndvector* nvec)
+size_t ndvector_dimensions(struct ndvector* nvec)
 {
         return nvec->dimensions;
 }
 
-void ees_ndvector_free(struct ees_ndvector* nvec)
+int ndvector_get_size(struct ndvector* nv, int dim)
+{
+        if (dim < 0 || dim >= nv->dimensions){
+                printf("ndvector::error: dim not in [0, %d]", nv->dimensions);
+                exit(EXIT_FAILURE);
+        }
+        return gsl_vector_get(nv->sizes, dim);
+}
+
+void ndvector_free(struct ndvector* nvec)
 {
         gsl_vector_free(nvec->sizes);
         gsl_vector_free(nvec->data);

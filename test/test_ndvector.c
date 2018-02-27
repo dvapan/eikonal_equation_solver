@@ -32,8 +32,8 @@ static void test_nvector_alloc() {
         size_t sizes[dimensions];
         sizes[0] = 10;
         sizes[1] = 15;
-        struct ees_ndvector* nv = ees_ndvector_alloc(dimensions, sizes);
-        g_assert_cmpint(ees_ndvector_dimensions(nv), == ,2);
+        struct ndvector* nv = ndvector_alloc(dimensions, sizes);
+        g_assert_cmpint(ndvector_dimensions(nv), == ,2);
 }
 
 static void test_nvector_get_set() {
@@ -41,18 +41,18 @@ static void test_nvector_get_set() {
         size_t sizes[dimensions];
         sizes[0] = 3;
         sizes[1] = 4;
-        struct ees_ndvector* nv = ees_ndvector_alloc(dimensions, sizes);
+        struct ndvector* nv = ndvector_alloc(dimensions, sizes);
         for (int i = 0; i < sizes[0]; i++)
                 for(int j = 0; j < sizes[1]; j++){
                         size_t vec[dimensions];
                         vec[0] = i; vec[1] = j;
-                        ees_ndvector_set(nv,vec,i*j);
+                        ndvector_set(nv,vec,i*j);
                 }
         for (int i = 0; i < sizes[0]; i++)
                 for(int j = 0; j < sizes[1]; j++){
                         size_t vec[dimensions];
                         vec[0] = i; vec[1] = j;
-                        g_assert_cmpint(ees_ndvector_get(nv,vec), ==, i*j);
+                        g_assert_cmpint(ndvector_get(nv,vec), ==, i*j);
                 }
 }
 
@@ -62,13 +62,13 @@ static void test_nvector_get_set_3d() {
         sizes[0] = 3;
         sizes[1] = 4;
         sizes[2] = 5;
-        struct ees_ndvector* nv = ees_ndvector_alloc(dimensions, sizes);
+        struct ndvector* nv = ndvector_alloc(dimensions, sizes);
         for (int i = 0; i < sizes[0]; i++)
                 for(int j = 0; j < sizes[1]; j++)
                         for(int k = 0; k < sizes[2]; k++){
                                 size_t vec[dimensions];
                                 vec[0] = i; vec[1] = j; vec[2] = k;
-                                ees_ndvector_set(nv,vec,i*j*k);
+                                ndvector_set(nv,vec,i*j*k);
 
                 }
         for (int i = 0; i < sizes[0]; i++)
@@ -76,7 +76,7 @@ static void test_nvector_get_set_3d() {
                         for(int k = 0; k < sizes[2]; k++){
                                 size_t vec[dimensions];
                                 vec[0] = i; vec[1] = j; vec[2] = k;
-                                g_assert_cmpint(ees_ndvector_get(nv,vec), ==, i*j*k);
+                                g_assert_cmpint(ndvector_get(nv,vec), ==, i*j*k);
                 }
 }
 
@@ -87,15 +87,26 @@ static void test_nvector_calloc() {
         sizes[0] = 3;
         sizes[1] = 4;
         sizes[2] = 5;
-        struct ees_ndvector* nv = ees_ndvector_calloc(dimensions, sizes);
+        struct ndvector* nv = ndvector_calloc(dimensions, sizes);
         for(int i = 0; i < sizes[0]; i++ )
                 for (int j = 0; j < sizes[1]; j++)
                         for (int k = 0; k < sizes[2]; k++){
                                 size_t vec[dimensions];
                                 vec[0] = i; vec[1] = j; vec[2] = k;
-                                g_assert_cmpint(ees_ndvector_get(nv, vec), == ,0);
+                                g_assert_cmpint(ndvector_get(nv, vec), == ,0);
                         }
 
+}
+
+void test_ndvector_get_size()
+{
+        int dimensions = 2;
+        size_t sizes[dimensions];
+        sizes[0] = 3;
+        sizes[1] = 4;
+        struct ndvector* nv = ndvector_alloc(dimensions, sizes);
+        g_assert_cmpint(ndvector_get_size(nv, 0), ==, 3);
+        g_assert_cmpint(ndvector_get_size(nv, 1), ==, 4);
 }
 
 int main(int argc, char *argv[])
@@ -105,6 +116,7 @@ int main(int argc, char *argv[])
         g_test_add_func("/ndvector/calloc", test_nvector_calloc);
         g_test_add_func("/ndvector/get_set/2d", test_nvector_get_set);
         g_test_add_func("/ndvector/get_set/3d", test_nvector_get_set);
+        g_test_add_func("/ndevctor/get_set/sizes", test_ndvector_get_size);
         return g_test_run();
 }
 
