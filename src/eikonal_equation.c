@@ -18,19 +18,19 @@ int eikonal_data_dims(struct eikonal_data *ed)
         return ed->curr_solve->dimensions;
 }
 
-double solve_ndims(struct eikonal_data *ed, struct node_data *nd, size_t dims, double *T_vals)
+double solve_ndims(struct eikonal_data *ed, size_t *pos, size_t dim, double* T_vals)
 {
-        double coeff = ed->step/ndvector_get(ed->velocites,nd->pos);
-        if (dims == 1)
+        double coeff = ed->step/ndvector_get(ed->velocites,pos);
+        if (dim == 1)
                 return T_vals[0] + coeff;
         double sumT = 0;
         double sqr_sumT = 0;
-        for (int i = 0; i < nd->dims; i++)
+        for (int i = 0; i < ed->dims; i++)
                 if (isfinite(T_vals[i])){
                         sumT += T_vals[i];
                         sqr_sumT += T_vals[i]*T_vals[i];
                 }
-        double a = dims;
+        double a = dim;
         double b = -2*sumT;
         double c = sqr_sumT - pow(coeff,2);
         double q = b*b - 4*a*c;
@@ -55,16 +55,22 @@ void sort(double* a, size_t dim)
         }
 }
 
-double solve_eikonal(struct eikonal_data *ed, struct node_data *nd)
+double solve_eikonal(struct eikonal_data *ed, size_t *pos)
 {
         size_t cnt_finite_T_vals = ed->dims;
         double T_vals[ed->dims];
         for (int dim = 0; dim < ed->dims; dim++) {
-                nd->pos[dim] += 1;
-                double l_val = ndvector_get(ed->curr_solve,nd->pos);
-                nd->pos[dim] -= 2;
-                double g_val = ndvector_get(ed->curr_solve,nd->pos);
-                nd->pos[dim] += 1;
+                pos[dim] += 1;
+                double l_val = INFINITY;
+                if (pos[dim] >= 0 &&
+                    pos[dim]<gsl_vector_get(ed->curr_solve->sizes, dim))
+                        l_val = ndvector_get(ed->curr_solve,pos);
+                pos[dim] -= 2;
+                double g_val = INFINITY;
+                if (pos[dim] >= 0 &&
+                    pos[dim]<gsl_vector_get(ed->curr_solve->sizes, dim))
+                        g_val = ndvector_get(ed->curr_solve,pos);
+                pos[dim] += 1;
                 double min_val = l_val < g_val ? l_val : g_val;
                 T_vals[dim] = min_val;
                 if (!isfinite(min_val))
@@ -73,22 +79,16 @@ double solve_eikonal(struct eikonal_data *ed, struct node_data *nd)
 
         if (cnt_finite_T_vals == 0) return INFINITY;
         size_t counter = 0;
-        sort(T_vals,nd->dims);
+        sort(T_vals,ed->dims);
 
         double res = INFINITY;
         for (int dim = 1; dim <= cnt_finite_T_vals; dim++) {
-                res = solve_ndims(ed, nd, dim, T_vals);
+                res = solve_ndims(ed, pos, dim, T_vals);
                 if (dim == cnt_finite_T_vals ||
-                    res < ndvector_get(ed->curr_solve, nd->pos))
+                    res < ndvector_get(ed->curr_solve, pos))
                         break;
         }
         return res;
 }
 
-struct node_data *node_data_alloc(size_t dims)
-{
-        struct node_data *nd = malloc(sizeof(struct node_data));
-        nd->pos = malloc(sizeof(size_t)*dims);
-        nd->dims = dims;
-}
 

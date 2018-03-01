@@ -3,7 +3,8 @@ project(ekeqsl)
 find_package(GSL REQUIRED)
 add_library(utils STATIC
     ndvector.c
-    eikonal_equation.c)
+    eikonal_equation.c
+    fsm.c)
 target_link_libraries(utils
     ${GSL_LIBRARIES}
     m)

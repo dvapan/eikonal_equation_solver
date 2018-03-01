@@ -36,7 +36,9 @@ int coords_to_vec(gsl_vector* sizes, size_t dimensions, size_t* vec)
         for (int i = 1; i < dimensions; i++) {
                 if (vec[dimensions - 1 - i] < 0 ||
                     vec[dimensions - 1 - i] >= gsl_vector_get(sizes, dimensions - 1 - i)){
-                        printf("EES: %d size boundary error %d not in [0,%d]\n", i, vec[i], sizes[i]);
+                        printf("EES: %d size boundary error %d not in [0,%d]\n", i,
+                               vec[dimensions - 1 - i],
+                               gsl_vector_get(sizes, dimensions - 1 - i));
                         exit(EXIT_FAILURE);
                 }
                 mult_coord *= gsl_vector_get(sizes, dimensions - 1 - i + 1);
