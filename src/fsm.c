@@ -38,3 +38,16 @@ bool sweep(struct eikonal_data *ed, size_t* pos, int *sweep_dirs, int n)
         return stop;
 
 }
+
+void fsm(struct eikonal_data *ed)
+{
+        int sweep_dirs[ed->dims];
+        for (int i = 0; i < ed->dims; i++)
+                sweep_dirs[i] = 1;
+        size_t pos[ed->dims];
+        bool stop = false;
+        while (!stop) {
+                set_sweep_dirs(sweep_dirs, ed->dims);
+                stop = sweep(ed,pos,sweep_dirs, ed->dims - 1);
+        }
+}

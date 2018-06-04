@@ -7,4 +7,6 @@
 void set_sweep_dirs(int* sweep_dirs, size_t dims);
 bool sweep(struct eikonal_data *ed, size_t *pos, int* sweep_dirs, int n);
 
+void fsm(struct eikonal_data *ed);
+
 #endif

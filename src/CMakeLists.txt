@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(ekeqsl)
 find_package(GSL REQUIRED)
 add_library(utils STATIC
+    graph.c
     ndvector.c
     eikonal_equation.c
     fsm.c)
