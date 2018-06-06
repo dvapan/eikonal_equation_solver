@@ -3,92 +3,63 @@
 #include <math.h>
 #include <stdlib.h>
 
-struct eikonal_data* eikonal_data_alloc(size_t dims, size_t* sizes, double step)
+void set_triangle(struct vertex* v, struct vertex* v1, struct vertex* v2,
+                  double* a, double* b, double* c, double *al, double* bt)
 {
-        struct eikonal_data *ed = malloc(sizeof(struct eikonal_data));
-        ed->dims = dims;
-        ed->curr_solve = ndvector_alloc(dims, sizes);
-        ed->velocites = ndvector_alloc(dims, sizes);
-        ed->step = step;
-        return ed;
+        double b2c = 0;
+        double a2c = 0;
+        *a=*b=*c=0;
+        for (int i = 0; i < v->cnt_dims; i++){
+                *a += (v->coords[i] - v2->coords[i])*(v->coords[i] - v2->coords[i]);
+                *b += (v->coords[i] - v1->coords[i])*(v->coords[i] - v1->coords[i]);
+                *c += (v1->coords[i]- v2->coords[i])*(v1->coords[i]- v2->coords[i]);
+                b2c+= (v->coords[i] - v2->coords[i])*(v1->coords[i]- v2->coords[i]);
+                a2c+= (v->coords[i] - v1->coords[i])*(v2->coords[i]- v1->coords[i]);
+        }
+        *a = sqrt(*a);
+        *b = sqrt(*b);
+        *c = sqrt(*c);
+        *al = acos(b2c/(*a*(*c)));
+        *bt = acos(a2c/(*b*(*c)));
 }
 
-int eikonal_data_dims(struct eikonal_data *ed)
+double solve_ndims(struct graph* mesh, int id)
 {
-        return ed->curr_solve->dimensions;
-}
+        double min_ux = INFINITY;
+        struct vertex* v = &mesh->vertices[id];
+        struct link* ngbrs = graph_get_neighbours(mesh,id);
+        int cnt_known = 0; int id_known = -1;
+        for(struct link* t = ngbrs; t != NULL; t = t->next){
+                for (struct link* r = t; r != NULL; r = r->next){
+                        struct vertex* v1 = t->vertex;
+                        struct vertex* v2 = r->vertex;
+                        double a,b,c,al,bt;
+                        set_triangle(v,v1,v2,&a,&b,&c,&al,&bt);
+                        if (isfinite(v2->ux)&& isfinite(v1->ux) && r != t && abs(v2->ux - v1->ux) <= c*v->fx){
+                                double th = asin(abs(v1->ux - v2->ux)/(c*v->fx));
+                                double lcorn = (al - M_PI/2 > 0) ? al - M_PI/2 : 0;
+                                double rcorn = (M_PI/2 - bt < 0) ? M_PI/2 - bt : 0;
+                                if (lcorn <= th && th <= M_PI/2 - bt || al - M_PI/2 <= th <= rcorn){
+                                        double h = a*sin(al - th);
+                                        double H = b*sin(bt + th);
+                                        double new_ux = 0.5*(h*v->fx + v2->ux) +
+                                                0.5*(H*v->fx + v1->ux);
+                                        if (new_ux < min_ux)
+                                                min_ux = new_ux;
+                                }
+                                else if (isfinite(v1->ux) && v1->ux + b*v->fx < min_ux)
+                                        min_ux = v1->ux + b*v->fx;
+                                else if (isfinite(v2->ux) && v2->ux + a*v->fx < min_ux)
+                                        min_ux = v2->ux + a*v->fx;
+                        }
+                        else if (isfinite(v1->ux) && v1->ux + b*v->fx < min_ux)
+                                min_ux = v1->ux + b*v->fx;
+                        else if (isfinite(v2->ux) && v2->ux + a*v->fx < min_ux)
+                                min_ux = v2->ux + a*v->fx;
 
-double solve_ndims(struct eikonal_data *ed, size_t *pos, size_t dim, double* T_vals)
-{
-        double coeff = ed->step/ndvector_get(ed->velocites,pos);
-        if (dim == 1)
-                return T_vals[0] + coeff;
-        double sumT = 0;
-        double sqr_sumT = 0;
-        for (int i = 0; i < ed->dims; i++)
-                if (isfinite(T_vals[i])){
-                        sumT += T_vals[i];
-                        sqr_sumT += T_vals[i]*T_vals[i];
                 }
-        double a = dim;
-        double b = -2*sumT;
-        double c = sqr_sumT - pow(coeff,2);
-        double q = b*b - 4*a*c;
-        if (q<0){
-                return INFINITY;
         }
-        else
-                return (-b + sqrt(q))/(2*a);
+        return min_ux;
+
 }
-
-void sort(double* a, size_t dim)
-{
-        for (int i = 0; i < dim; i++){
-                int min = i;
-                for(int j = i+1; j < dim; j++)
-                        if (isfinite(a[j]) && a[j]<a[min])
-                                min = j;
-                double tmp = a[i];
-                a[i] = a[min];
-                a[min] = tmp;
-
-        }
-}
-
-double solve_eikonal(struct eikonal_data *ed, size_t *pos)
-{
-        size_t cnt_finite_T_vals = ed->dims;
-        double T_vals[ed->dims];
-        for (int dim = 0; dim < ed->dims; dim++) {
-                pos[dim] += 1;
-                double l_val = INFINITY;
-                if (pos[dim] >= 0 &&
-                    pos[dim]<gsl_vector_get(ed->curr_solve->sizes, dim))
-                        l_val = ndvector_get(ed->curr_solve,pos);
-                pos[dim] -= 2;
-                double g_val = INFINITY;
-                if (pos[dim] >= 0 &&
-                    pos[dim]<gsl_vector_get(ed->curr_solve->sizes, dim))
-                        g_val = ndvector_get(ed->curr_solve,pos);
-                pos[dim] += 1;
-                double min_val = l_val < g_val ? l_val : g_val;
-                T_vals[dim] = min_val;
-                if (!isfinite(min_val))
-                        cnt_finite_T_vals--;
-        }
-
-        if (cnt_finite_T_vals == 0) return INFINITY;
-        size_t counter = 0;
-        sort(T_vals,ed->dims);
-
-        double res = INFINITY;
-        for (int dim = 1; dim <= cnt_finite_T_vals; dim++) {
-                res = solve_ndims(ed, pos, dim, T_vals);
-                if (dim == cnt_finite_T_vals ||
-                    res < ndvector_get(ed->curr_solve, pos))
-                        break;
-        }
-        return res;
-}
-
 

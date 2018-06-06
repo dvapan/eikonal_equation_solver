@@ -3,154 +3,106 @@
 
 #include "eikonal_equation.h"
 #include "ndvector.h"
+#include "graph.h"
 
-
-static void test_eikonal_equation_data()
-{
-    int dims = 2;
-    size_t sizes[dims];
-    sizes[0] = 10;
-    sizes[1] = 15;
-    struct eikonal_data *ed = eikonal_data_alloc(dims, sizes, 0.1);
-    assert(eikonal_data_dims(ed) == 2);
-    struct ndvector *vec = ed->velocites;
-    assert(ndvector_dimensions(vec) == 2);
-    vec = ed->curr_solve;
-    assert(ndvector_dimensions(vec) == 2);
-
-}
 
 static void test_solve_ndims_one_dimension()
 {
-    size_t dims = 1;
-    double T_vals[dims];
-    T_vals[0] = 1.0;
-    size_t pos[dims];
-    pos[0] = 1;
-    size_t size[1];
-    size[0] = 3;
-    struct ndvector *F = ndvector_alloc(1, size);
-    size_t vec[1];
-    vec[0] = 0;
-    ndvector_set(F, vec, 1.0);
-    vec[0] = 1;
-    ndvector_set(F, vec, 1.0);
-    vec[0] = 2;
-    ndvector_set(F, vec, 1.0);
-    struct eikonal_data* ed = eikonal_data_alloc(dims, size, 0.1);
-    double res = solve_ndims(ed,pos,1, T_vals);
-    assert(abs(res - 1.1) < 0.01);
+
+        int cnt_vertices = 3;
+        int dims = 1;
+
+        double *coords[cnt_vertices];
+        double  values[cnt_vertices];
+
+        for(int i = 0; i < cnt_vertices; i++)
+        {
+                coords[i] = malloc(sizeof(double)* 2);
+                values[i] = 1;
+        }
+        coords[0][0] = 0;
+        coords[1][0] = 0.1;
+        coords[2][0] = 0.3;
+
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        graph_connect(mesh, 0,1);
+        graph_connect(mesh, 1,2);
+
+        mesh->vertices[0].ux = 1;
+
+        double res = solve_ndims(mesh,1);
+        assert(round(res*10)/10 == 1.1);
+        printf("DONE\n");
 }
 
-void test_T_vals_2d(struct eikonal_data* ed,
-                    double t1, double t2, double asrtres)
-{
-    size_t pos[ed->dims];
-    pos[0] = 2;
-    pos[1] = 2;
-    double T_vals[ed->dims];
-    T_vals[0] = t1;
-    T_vals[1] = t2;
-    double res = solve_ndims(ed,pos,2, T_vals);
-    //        printf ("\n%lf %lf",res,asrtres);
-    assert(isfinite(res)||(isinf(asrtres)&&isinf(res)));
-    assert(abs(res - asrtres) < 0.001);
-}
 
 static void test_solve_ndims_two_dimensions()
 {
+        int cnt_vertices = 7;
+        int dims = 2;
 
-    size_t dims = 2;
-    size_t pos[dims];
-    pos[0] = 2;
-    pos[1] = 2;
-    size_t size[dims];
-    size[0] = 5;
-    size[1] = 5;
-    struct eikonal_data* ed = eikonal_data_alloc(dims, size, 1.0);
-    size_t vec[dims];
-    for (int i = 0; i < size[0]; i++)
-        for (int j = 0; j < size[1]; j++){
-            vec[0] = i;
-            vec[1] = j;
-            ndvector_set(ed->velocites, vec, 1.0);
-            ndvector_set(ed->curr_solve, vec, INFINITY);
+        double *coords[cnt_vertices];
+        double  values[cnt_vertices];
+
+        for(int i = 0; i < cnt_vertices; i++)
+        {
+                coords[i] = malloc(sizeof(double)* 2);
+                values[i] = 1;
         }
+       
+        coords[0][0] = 0;
+        coords[0][1] = 0;
+        coords[1][0] = 1;
+        coords[1][1] = 0;
+        coords[2][0] = -sin(M_PI/6);
+        coords[2][1] = -cos(M_PI/6);
+        coords[3][0] =  sin(M_PI/6);
+        coords[3][1] = -cos(M_PI/6);
+        coords[4][0] = 1+sin(M_PI/6);
+        coords[4][1] = -cos(M_PI/6);
+        coords[5][0] = 0;
+        coords[5][1] = -2*cos(M_PI/6);
+        coords[6][0] = 1;
+        coords[6][1] = -2*cos(M_PI/6);
+        
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        graph_connect(mesh, 0,1);
+        graph_connect(mesh, 0,2);
+        graph_connect(mesh, 0,3);
+        graph_connect(mesh, 1,3);
+        graph_connect(mesh, 1,4);
+        graph_connect(mesh, 2,3);
+        graph_connect(mesh, 2,5);
+        graph_connect(mesh, 3,5);
+        graph_connect(mesh, 3,6);
+        graph_connect(mesh, 3,4);
 
-    test_T_vals_2d(ed,1.0,1.0,1.707);
+        mesh->vertices[0].ux = 0;
+        mesh->vertices[1].ux = 1;
+        mesh->vertices[2].ux = 1;
+        mesh->vertices[3].ux = 1;
 
-    //        test_T_vals_2d(ed,nd,INFINITY,1.0,1.00);
-
-    test_T_vals_2d(ed,2.0,1.707,2.545329);
-
-    test_T_vals_2d(ed,3.0,1.0,INFINITY);
-
-}
-
-void test_solve_eikonal()
-{
-    size_t dims = 2;
-    size_t pos[dims];
-    pos[0] = 2;
-    pos[1] = 2;
-    size_t size[dims];
-    size[0] = 5;
-    size[1] = 5;
-    struct eikonal_data* ed = eikonal_data_alloc(dims, size, 1.0);
-    size_t vec[dims];
-    for (int i = 0; i < size[0]; i++)
-        for (int j = 0; j < size[1]; j++){
-            vec[0] = i;
-            vec[1] = j;
-            ndvector_set(ed->velocites, vec, 1.0);
-            ndvector_set(ed->curr_solve, vec, INFINITY);
-        }
-    vec[0] = 2;
-    vec[1] = 2;
-    ndvector_set(ed->curr_solve, vec, 0);
-    vec[0] = 1;
-    vec[1] = 2;
-    ndvector_set(ed->curr_solve, vec, 1);
-    vec[0] = 2;
-    vec[1] = 1;
-    ndvector_set(ed->curr_solve, vec, 1);
-
-
-    pos[0] = 1;
-    pos[1] = 1;
-
-    double new_T = solve_eikonal(ed, pos);
-
-    assert(isfinite(new_T));
-    assert(abs(new_T - 1.707) < 0.001);
-
-    pos[0] = 2;
-    pos[1] = 3;
-
-    new_T = solve_eikonal(ed, pos);
-
-    assert(isfinite(new_T));
-    assert(abs(new_T - 1.0) < 0.001);
-
-    pos[0] = 1;
-    pos[1] = 3;
-
-    new_T = solve_eikonal(ed, pos);
-
-    assert(isfinite(new_T));
-    assert(abs(new_T - 2.0) < 0.001);
+        double res = solve_ndims(mesh,5);
+        printf("%lf %lf\n",res, 1+sqrt(3.0)/2.0);
+        assert(abs(res - (1+sqrt(3.0)/2.0)) < 0.01);
+        res = solve_ndims(mesh,4);
+        assert(abs(res - (1+sqrt(3.0)/2.0)) < 0.01);
+        printf("DONE\n");
+        mesh->vertices[4].ux = (1+sqrt(3.0)/2.0);
+        mesh->vertices[6].ux = (1+sqrt(3.0)/2.0);
+        res = solve_ndims(mesh,6);
+        assert(abs(res - (2.00) < 0.01));
 
 }
 
 
 int main(int argc, char *argv[])
 {
-    test_eikonal_equation_data();
 
-    test_solve_ndims_one_dimension();
-    test_solve_ndims_two_dimensions();
-    test_solve_eikonal();
 
-    return EXIT_SUCCESS;
+        test_solve_ndims_one_dimension();
+        test_solve_ndims_two_dimensions();
+
+        return EXIT_SUCCESS;
 }
 

@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
+
 #include "graph.h"
 
 void fill_vertex(struct vertex* v, int cnt_dims, double* coords, double fx)
@@ -7,6 +9,7 @@ void fill_vertex(struct vertex* v, int cnt_dims, double* coords, double fx)
         v->cnt_dims = cnt_dims;
         v->coords = coords;
         v->fx = fx;
+        v->ux = INFINITY;
 }
 
 struct link *new_link(struct vertex* vertex, struct link* next)

@@ -25,7 +25,11 @@ target_link_libraries(test_fsm
 add_executable(test_graph test_graph.c)
 target_link_libraries(test_graph utils)
 
-add_test(eikonal_equation "run_tests")
+add_executable(test_triangle test_triangle.c)
+target_link_libraries(test_triangle utils)
+
+add_test(eikonal_equation "test_eikonal_equation")
 add_test(nvector "test_nvector")
 add_test(fsm "test_fsm" )
 add_test(graph "test_graph")
+add_test(triangle "test_triangle")
