@@ -7,7 +7,7 @@
 double distance(double x11, double x12, double x21, double x22)
 {
         /* printf("[%lf %lf] - [%lf %lf] = sqrt(%lf) = %lf\n",x11,x12,x21,x22, */
-               pow(x21-x11,2)+ pow(x22-x12,2),sqrt(pow(x21-x11,2)+ pow(x22-x12,2)));
+               /* pow(x21-x11,2)+ pow(x22-x12,2),sqrt(pow(x21-x11,2)+ pow(x22-x12,2))); */
         return sqrt(pow(x21-x11,2)+ pow(x22-x12,2));
 }
 
