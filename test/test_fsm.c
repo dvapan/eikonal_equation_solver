@@ -13,11 +13,13 @@ static void test_fsm_rct_grid()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
                 coords[i] = malloc(sizeof(double)* 2);
                 values[i] = 1;
+                init_u[i] = INFINITY;
         }
        
         int id =0;
@@ -31,9 +33,10 @@ static void test_fsm_rct_grid()
                         id++;
                 }
 
+        init_u[point_zero] = 0;
         
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
-        mesh->vertices[point_zero].ux = 0;
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values, init_u);
+
         triag_mesh(mesh);
         fsm(mesh);
 
@@ -89,13 +92,16 @@ static void test_fsm()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
                 coords[i] = malloc(sizeof(double)* 2);
                 values[i] = 1;
+                init_u[i] = INFINITY;
         }
-       
+        init_u[0] = 0;
+        
         coords[0][0] = 0;
         coords[0][1] = 0;
         coords[1][0] = 1;
@@ -120,7 +126,7 @@ static void test_fsm()
         /* coords[10][1] = 0; */
 
         
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values,init_u);
         mesh->vertices[0].ux = 0;
         triag_mesh(mesh);
         fsm(mesh);
@@ -142,6 +148,7 @@ void test_sort_for_sweep ()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
@@ -165,7 +172,7 @@ void test_sort_for_sweep ()
         coords[6][0] = 1;
         coords[6][1] = -2*cos(M_PI/6);
 
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values,init_u);
         int* sweep = malloc(sizeof(int)*cnt_vertices);
         for(int i = 0; i < cnt_vertices;i++)
                 sweep[i]=i;
@@ -192,6 +199,7 @@ void test_triangulation()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
@@ -214,7 +222,7 @@ void test_triangulation()
         coords[6][0] = 1;
         coords[6][1] = -2*cos(M_PI/6);
 
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values,init_u);
         triag_mesh(mesh);
         
         assert(graph_is_connected(mesh, 0,1));

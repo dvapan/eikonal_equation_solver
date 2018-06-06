@@ -4,12 +4,12 @@
 
 #include "graph.h"
 
-void fill_vertex(struct vertex* v, int cnt_dims, double* coords, double fx)
+void fill_vertex(struct vertex* v, int cnt_dims, double* coords, double fx, double ux)
 {
         v->cnt_dims = cnt_dims;
         v->coords = coords;
         v->fx = fx;
-        v->ux = INFINITY;
+        v->ux = ux;
 }
 
 struct link *new_link(struct vertex* vertex, struct link* next)
@@ -22,14 +22,15 @@ struct link *new_link(struct vertex* vertex, struct link* next)
 }
 
 struct graph* make_graph(int cnt_vertices, int cnt_dims ,
-                         double* coords[],double* values)
+                         double* coords[],double* values,
+                         double* init_u)
 {
         struct graph* g = malloc(sizeof (struct graph));
         g->cnt_vertices = cnt_vertices;
         g->cnt_edges = 0;
         g->vertices = malloc(sizeof(struct vertex) * cnt_vertices);
         for (int v = 0; v < cnt_vertices; v++) {
-                fill_vertex(&g->vertices[v],cnt_dims,coords[v],values[v]);
+                fill_vertex(&g->vertices[v],cnt_dims,coords[v],values[v],init_u[v]);
                 g->vertices[v].id = v;
         }
         g->adj = malloc(sizeof(struct link) * cnt_vertices);

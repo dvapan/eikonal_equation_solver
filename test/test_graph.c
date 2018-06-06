@@ -19,9 +19,10 @@ void test_graph()
     coords[4][0] = 4;
     coords[4][1] = 3;
     double values[cnt_nodes];
+    double init_u[cnt_nodes];
 
     struct graph* g = make_graph(cnt_nodes,cnt_dims,
-                                 coords,values);
+                                 coords,values, init_u);
 
     graph_connect(g, 0, 1);
     graph_connect(g, 0, 2);

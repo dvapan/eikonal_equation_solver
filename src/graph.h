@@ -27,7 +27,8 @@ struct graph
 };
 
 struct graph* make_graph(int cnt_vertices, int cnt_dims,
-                         double** coords, double* values);
+                         double** coords, double* values,
+                         double* init_u);
 void graph_connect(struct graph*, int, int);
 bool graph_is_connected(struct graph*, int, int);
 struct link* graph_get_neighbours(struct graph* g, int id);

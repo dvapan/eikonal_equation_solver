@@ -14,17 +14,19 @@ static void test_solve_ndims_one_dimension()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
                 coords[i] = malloc(sizeof(double)* 2);
                 values[i] = 1;
+                init_u[i] = INFINITY;
         }
         coords[0][0] = 0;
         coords[1][0] = 0.1;
         coords[2][0] = 0.3;
 
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values, init_u);
         graph_connect(mesh, 0,1);
         graph_connect(mesh, 1,2);
 
@@ -43,11 +45,13 @@ static void test_solve_ndims_two_dimensions()
 
         double *coords[cnt_vertices];
         double  values[cnt_vertices];
+        double  init_u[cnt_vertices];
 
         for(int i = 0; i < cnt_vertices; i++)
         {
                 coords[i] = malloc(sizeof(double)* 2);
                 values[i] = 1;
+                init_u[i] = INFINITY;
         }
        
         coords[0][0] = 0;
@@ -65,7 +69,7 @@ static void test_solve_ndims_two_dimensions()
         coords[6][0] = 1;
         coords[6][1] = -2*cos(M_PI/6);
         
-        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values);
+        struct graph* mesh = make_graph(cnt_vertices,dims, coords, values, init_u);
         graph_connect(mesh, 0,1);
         graph_connect(mesh, 0,2);
         graph_connect(mesh, 0,3);
