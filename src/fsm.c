@@ -137,16 +137,67 @@ void set_sweep_dirs(int *sweep_dirs, size_t dims)
 
 /* } */
 
-/* void fsm(struct eikonal_data *ed) */
-/* { */
-/*         int sweep_dirs[ed->dims]; */
-/*         for (int i = 0; i < ed->dims; i++) */
-/*                 sweep_dirs[i] = 1; */
-/*         size_t pos[ed->dims]; */
-/*         bool stop = false; */
-/*         while (!stop) { */
-/*                 set_sweep_dirs(sweep_dirs, ed->dims); */
-/*                 stop = sweep(ed,pos,sweep_dirs, ed->dims - 1); */
-/*         } */
-/* } */
+bool solve_on_sweep(int* sweep, struct graph* mesh)
+{
+        bool stop = true;
+        for(int i = 0; i < mesh->cnt_vertices; i++){
+                double res = solve_ndims(mesh,sweep[i]);
+                if (isinf(mesh->vertices[sweep[i]].ux) || res < mesh->vertices[sweep[i]].ux){
+                        mesh->vertices[sweep[i]].ux = res;
+                        stop = false;
+                }
+        }
+
+        for(int i = mesh->cnt_vertices - 1; i >=0 ; i--){
+                double res = solve_ndims(mesh,sweep[i]);
+                if (isinf(mesh->vertices[sweep[i]].ux) || res < mesh->vertices[sweep[i]].ux){
+                        mesh->vertices[sweep[i]].ux = res;
+                        stop = false;
+                }
+        }
+        return stop;
+}
+
+void fsm(struct graph* mesh)
+{
+        int cnt_pt_ref = 3;
+        int dim = 2;
+        int ref_points[cnt_pt_ref][dim];
+        ref_points[0][0] = -0.5;
+        ref_points[0][1] = -0.5;
+        ref_points[1][0] = 1;
+        ref_points[1][1] = 0;
+        ref_points[2][0] = 0.5;
+        ref_points[2][1] = 0.5;
+        int** sweep = malloc(sizeof(int)*cnt_pt_ref);
+        for(int i = 0; i<cnt_pt_ref; i++){
+                sweep[i] = malloc(sizeof(int)*mesh->cnt_vertices);
+                for(int j = 0; j < mesh->cnt_vertices;j++)
+                        sweep[i][j]=j;
+                sort(mesh->cnt_vertices,ref_points[i][0],ref_points[i][1],mesh->vertices, sweep[i]);
+        }
+        for(int j = 0; j < cnt_pt_ref; j++){
+                for(int i = 0; i < mesh->cnt_vertices;i++)
+                        printf("%d ", sweep[j][i]);
+                printf("\n");
+
+        }
+        bool stop =false;
+        while(!stop){
+                for(int id_ref = 0; id_ref<cnt_pt_ref; id_ref++){
+                        stop = solve_on_sweep(sweep[id_ref], mesh);
+                }
+                
+        }
+        /* int sweep_dirs[ed->dims]; */
+        /* for (int i = 0; i < ed->dims; i++) */
+        /*         sweep_dirs[i] = 1; */
+        /* size_t pos[ed->dims]; */
+        /* bool stop = false; */
+        /* while (!stop) { */
+        /*         set_sweep_dirs(sweep_dirs, ed->dims); */
+        /*         stop = sweep(ed,pos,sweep_dirs, ed->dims - 1); */
+        /* } */
+        
+}
 

@@ -33,6 +33,16 @@ double solve_ndims(struct graph* mesh, int id)
                 for (struct link* r = t; r != NULL; r = r->next){
                         struct vertex* v1 = t->vertex;
                         struct vertex* v2 = r->vertex;
+
+                        if (isfinite(t->vertex->ux) && isfinite(r->vertex->ux)){
+                                if (t->vertex->ux < r->vertex->ux) {
+                                        v1 = t->vertex;
+                                        v2 = r->vertex;
+                                } else {
+                                        v2 = t->vertex;
+                                        v1 = r->vertex;
+                                }
+                        } 
                         double a,b,c,al,bt;
                         set_triangle(v,v1,v2,&a,&b,&c,&al,&bt);
                         if (isfinite(v2->ux)&& isfinite(v1->ux) && r != t && abs(v2->ux - v1->ux) <= c*v->fx){
