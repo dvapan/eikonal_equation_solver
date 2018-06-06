@@ -1,7 +1,7 @@
 #include "fsm.h"
 #include "triangle.h"
 #include <math.h>
-
+#include <stdio.h>
 
 
 double distance(double x11, double x12, double x21, double x22)
@@ -60,7 +60,7 @@ void triag_mesh(struct graph* mesh)
         in.numberofregions = 0;
         in.regionlist = (REAL *) malloc(in.numberofregions * 4 * sizeof(REAL));
 
-                mid.pointlist = (REAL *) NULL;            /* Not needed if -N switch used. */
+        mid.pointlist = (REAL *) NULL;            /* Not needed if -N switch used. */
         /* Not needed if -N switch used or number of point attributes is zero: */
         mid.pointattributelist = (REAL *) NULL;
         mid.pointmarkerlist = (int *) NULL; /* Not needed if -N or -B switch used. */
@@ -109,10 +109,11 @@ void set_sweep_dirs(int *sweep_dirs, size_t dims)
 
 bool solve_on_sweep(int* sweep, struct graph* mesh)
 {
+        double eps = 0.01;
         bool stop = true;
         for(int i = 0; i < mesh->cnt_vertices; i++){
                 double res = solve_ndims(mesh,sweep[i]);
-                if (isinf(mesh->vertices[sweep[i]].ux) || res < mesh->vertices[sweep[i]].ux){
+                if ((mesh->vertices[sweep[i]].ux-res) > eps) {
                         mesh->vertices[sweep[i]].ux = res;
                         stop = false;
                 }
@@ -120,7 +121,7 @@ bool solve_on_sweep(int* sweep, struct graph* mesh)
 
         for(int i = mesh->cnt_vertices - 1; i >=0 ; i--){
                 double res = solve_ndims(mesh,sweep[i]);
-                if (isinf(mesh->vertices[sweep[i]].ux) || res < mesh->vertices[sweep[i]].ux){
+                if ((mesh->vertices[sweep[i]].ux-res) > eps) {
                         mesh->vertices[sweep[i]].ux = res;
                         stop = false;
                 }
@@ -130,15 +131,18 @@ bool solve_on_sweep(int* sweep, struct graph* mesh)
 
 void fsm(struct graph* mesh)
 {
+
         int cnt_pt_ref = 3;
         int dim = 2;
         int ref_points[cnt_pt_ref][dim];
-        ref_points[0][0] = -0.5;
-        ref_points[0][1] = -0.5;
-        ref_points[1][0] = 1;
-        ref_points[1][1] = 0;
-        ref_points[2][0] = 0.5;
-        ref_points[2][1] = 0.5;
+        /* FIXME: ref_point loaded from file */
+        ref_points[0][0] = 0;
+        ref_points[0][1] = 0;
+        ref_points[1][0] = 5;
+        ref_points[1][1] = 1;
+        ref_points[2][0] = 3;
+        ref_points[2][1] = 6;
+
         int** sweep = malloc(sizeof(int)*cnt_pt_ref);
         for(int i = 0; i<cnt_pt_ref; i++){
                 sweep[i] = malloc(sizeof(int)*mesh->cnt_vertices);
@@ -146,14 +150,10 @@ void fsm(struct graph* mesh)
                         sweep[i][j]=j;
                 sort(mesh->cnt_vertices,ref_points[i][0],ref_points[i][1],mesh->vertices, sweep[i]);
         }
-        for(int j = 0; j < cnt_pt_ref; j++){
-                for(int i = 0; i < mesh->cnt_vertices;i++)
-                        printf("%d ", sweep[j][i]);
-                printf("\n");
-
-        }
         bool stop =false;
+        int iterator = 0;
         while(!stop){
+                printf("it:%d\n", iterator++);
                 for(int id_ref = 0; id_ref<cnt_pt_ref; id_ref++){
                         stop = solve_on_sweep(sweep[id_ref], mesh);
                 }
