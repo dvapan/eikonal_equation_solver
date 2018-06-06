@@ -42,30 +42,42 @@ double solve_ndims(struct graph* mesh, int id)
                                         v2 = t->vertex;
                                         v1 = r->vertex;
                                 }
-                        } 
+                        } else if (isfinite(t->vertex->ux))
+                        {
+                                v1 = t->vertex;
+                                v2 = r->vertex;
+
+                        } else if (isfinite(r->vertex->ux))
+                        {
+                                v2 = t->vertex;
+                                v1 = r->vertex;
+
+                        }
+
                         double a,b,c,al,bt;
                         set_triangle(v,v1,v2,&a,&b,&c,&al,&bt);
-                        if (isfinite(v2->ux)&& isfinite(v1->ux) && r != t && abs(v2->ux - v1->ux) <= c*v->fx){
-                                double th = asin(abs(v1->ux - v2->ux)/(c*v->fx));
+                        /* printf("%lf %lf %lf | %lf %lf\n", a,b,c,al,bt); */
+                        if (isfinite(v2->ux)&& isfinite(v1->ux) && r != t && abs(v2->ux - v1->ux) <= c/v->fx){
+                                double th = asin(abs(v1->ux - v2->ux)/(c/v->fx));
                                 double lcorn = (al - M_PI/2 > 0) ? al - M_PI/2 : 0;
                                 double rcorn = (M_PI/2 - bt < 0) ? M_PI/2 - bt : 0;
                                 if (lcorn <= th && th <= M_PI/2 - bt || al - M_PI/2 <= th <= rcorn){
                                         double h = a*sin(al - th);
                                         double H = b*sin(bt + th);
-                                        double new_ux = 0.5*(h*v->fx + v2->ux) +
-                                                0.5*(H*v->fx + v1->ux);
+                                        double new_ux = 0.5*(h/v->fx + v2->ux) +
+                                                0.5*(H/v->fx + v1->ux);
                                         if (new_ux < min_ux)
                                                 min_ux = new_ux;
                                 }
-                                else if (isfinite(v1->ux) && v1->ux + b*v->fx < min_ux)
-                                        min_ux = v1->ux + b*v->fx;
-                                else if (isfinite(v2->ux) && v2->ux + a*v->fx < min_ux)
-                                        min_ux = v2->ux + a*v->fx;
+                                else if (isfinite(v1->ux) && v1->ux + b/v->fx < min_ux)
+                                        min_ux = v1->ux + b/v->fx;
+                                else if (isfinite(v2->ux) && v2->ux + a/v->fx < min_ux)
+                                        min_ux = v2->ux + a/v->fx;
                         }
-                        else if (isfinite(v1->ux) && v1->ux + b*v->fx < min_ux)
-                                min_ux = v1->ux + b*v->fx;
-                        else if (isfinite(v2->ux) && v2->ux + a*v->fx < min_ux)
-                                min_ux = v2->ux + a*v->fx;
+                        else if (isfinite(v1->ux) && v1->ux + b/v->fx < min_ux)
+                                min_ux = v1->ux + b/v->fx;
+                        else if (isfinite(v2->ux) && v2->ux + a/v->fx < min_ux)
+                                min_ux = v2->ux + a/v->fx;
 
                 }
         }
