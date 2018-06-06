@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 {
 
 
-        /* test_solve_ndims_one_dimension(); */
+        test_solve_ndims_one_dimension();
         test_solve_ndims_two_dimensions();
 
         return EXIT_SUCCESS;
