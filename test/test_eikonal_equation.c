@@ -80,6 +80,8 @@ static void test_solve_ndims_two_dimensions()
         graph_connect(mesh, 3,5);
         graph_connect(mesh, 3,6);
         graph_connect(mesh, 3,4);
+        graph_connect(mesh, 4,6);
+        graph_connect(mesh, 5,6);
 
         mesh->vertices[0].ux = 0;
         mesh->vertices[1].ux = 1;
@@ -93,9 +95,11 @@ static void test_solve_ndims_two_dimensions()
         assert(abs(res - (1+sqrt(3.0)/2.0)) < 0.01);
         printf("DONE\n");
         mesh->vertices[4].ux = (1+sqrt(3.0)/2.0);
-        mesh->vertices[6].ux = (1+sqrt(3.0)/2.0);
+        mesh->vertices[5].ux = (1+sqrt(3.0)/2.0);
         res = solve_ndims(mesh,6);
+        printf("%lf %lf\n",res, 1+sqrt(3.0)/2.0);
         assert(abs(res - (2.00) < 0.01));
+
 
 }
 
@@ -104,7 +108,7 @@ int main(int argc, char *argv[])
 {
 
 
-        test_solve_ndims_one_dimension();
+        /* test_solve_ndims_one_dimension(); */
         test_solve_ndims_two_dimensions();
 
         return EXIT_SUCCESS;
