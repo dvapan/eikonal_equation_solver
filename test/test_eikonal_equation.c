@@ -53,7 +53,7 @@ static void test_solve_ndims_two_dimensions()
                 values[i] = 1;
                 init_u[i] = INFINITY;
         }
-       
+
         coords[0][0] = 0;
         coords[0][1] = 0;
         coords[1][0] = 1;
@@ -68,7 +68,7 @@ static void test_solve_ndims_two_dimensions()
         coords[5][1] = -2*cos(M_PI/6);
         coords[6][0] = 1;
         coords[6][1] = -2*cos(M_PI/6);
-        
+
         struct graph* mesh = make_graph(cnt_vertices,dims, coords, values, init_u);
         graph_connect(mesh, 0,1);
         graph_connect(mesh, 0,2);

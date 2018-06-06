@@ -6,8 +6,6 @@
 
 double distance(double x11, double x12, double x21, double x22)
 {
-        /* printf("[%lf %lf] - [%lf %lf] = sqrt(%lf) = %lf\n",x11,x12,x21,x22, */
-               /* pow(x21-x11,2)+ pow(x22-x12,2),sqrt(pow(x21-x11,2)+ pow(x22-x12,2))); */
         return sqrt(pow(x21-x11,2)+ pow(x22-x12,2));
 }
 
@@ -21,7 +19,6 @@ void sort(int cnt_vertices, double x1, double x2, struct vertex* vertices, int* 
                         if (distance(x1,x2,v->coords[0],v->coords[1]) <
                             distance(x1,x2,v_min->coords[0],v_min->coords[1])){
                                 min = j;
-                                /* printf("LOL\n"); */
                         }
                 }
                 int tmp = sweep[i];
@@ -109,33 +106,6 @@ void set_sweep_dirs(int *sweep_dirs, size_t dims)
         }
 }
 
-/* bool sweep(struct eikonal_data *ed, size_t* pos, int *sweep_dirs, int n) */
-/* { */
-/*         bool stop = true; */
-/*         int len = gsl_vector_get(ed->curr_solve->sizes, n); */
-/*         if (n > 0) */
-/*                 for (int i = 0; i < len; i++){ */
-/*                         int _i = 0; */
-/*                         if (sweep_dirs[n] == 1) _i = i; */
-/*                         else                    _i = len - i - 1; */
-/*                         pos[n] = _i; */
-/*                         stop = sweep(ed, pos, sweep_dirs, n - 1); */
-/*                 } */
-/*         else */
-/*                 for (int i = 0; i < len; i++) { */
-/*                         int _i = 0; */
-/*                         if (sweep_dirs[n] == 1) _i = i; */
-/*                         else                    _i = len - i - 1; */
-/*                         pos[n] = _i; */
-/*                         double new_T = solve_eikonal(ed,pos); */
-/*                         if (new_T < ndvector_get(ed->curr_solve, pos)){ */
-/*                                 ndvector_set(ed->curr_solve, pos, new_T); */
-/*                                 stop = false; */
-/*                         } */
-/*                 } */
-/*         return stop; */
-
-/* } */
 
 bool solve_on_sweep(int* sweep, struct graph* mesh)
 {
@@ -187,17 +157,6 @@ void fsm(struct graph* mesh)
                 for(int id_ref = 0; id_ref<cnt_pt_ref; id_ref++){
                         stop = solve_on_sweep(sweep[id_ref], mesh);
                 }
-                
         }
-        /* int sweep_dirs[ed->dims]; */
-        /* for (int i = 0; i < ed->dims; i++) */
-        /*         sweep_dirs[i] = 1; */
-        /* size_t pos[ed->dims]; */
-        /* bool stop = false; */
-        /* while (!stop) { */
-        /*         set_sweep_dirs(sweep_dirs, ed->dims); */
-        /*         stop = sweep(ed,pos,sweep_dirs, ed->dims - 1); */
-        /* } */
-        
 }
 

@@ -21,7 +21,6 @@ static void test_fsm_rct_grid()
                 values[i] = 1;
                 init_u[i] = INFINITY;
         }
-       
         int id =0;
         int point_zero = 0;
         for(int i = -2; i<=2; i++)
@@ -34,7 +33,6 @@ static void test_fsm_rct_grid()
                 }
 
         init_u[point_zero] = 0;
-        
         struct graph* mesh = make_graph(cnt_vertices,dims, coords, values, init_u);
 
         triag_mesh(mesh);
@@ -44,49 +42,10 @@ static void test_fsm_rct_grid()
                 struct vertex* v = &mesh->vertices[i];
                 printf("[% 4.2lf % 4.2lf] = %lf\n", v->coords[0],v->coords[1],v->ux);
         }
-        
-        /* double answers[cnt_vertices]= */
-        /*         {} */
-        
 }
 
 static void test_fsm()
 {
-        /* size_t dims = 2; */
-        /* size_t size[dims]; */
-        /* size[0] = 5; */
-        /* size[1] = 5; */
-        /* struct eikonal_data* ed = eikonal_data_alloc(dims, size, 1.0); */
-        /* size_t vec[dims]; */
-        /* for (int i = 0; i < size[0]; i++) */
-        /*         for (int j = 0; j < size[1]; j++){ */
-        /*                 vec[0] = i; */
-        /*                 vec[1] = j; */
-        /*                 ndvector_set(ed->velocites, vec, 1.0); */
-        /*                 ndvector_set(ed->curr_solve, vec, INFINITY); */
-        /*         } */
-        /* vec[0] = 2; */
-        /* vec[1] = 2; */
-        /* ndvector_set(ed->curr_solve, vec, 0); */
-        /* fsm(ed); */
-
-        /* double expected_res[5][5] = */
-        /*         {{3.25,2.55,2.00,2.55,3.25}, */
-        /*          {2.55,1.71,1.00,1.71,2.55}, */
-        /*          {2.00,1.00,0.00,1.00,2.00}, */
-        /*          {2.55,1.71,1.00,1.71,2.55}, */
-        /*          {3.25,2.55,2.00,2.55,3.25}}; */
-
-        /* size_t height = gsl_vector_get (ed->curr_solve->sizes,0); */
-        /* size_t width = gsl_vector_get(ed->curr_solve->sizes,1); */
-        /* for(int i = 0; i < height; i++){ */
-        /*         for(int j = 0; j < width; j++){ */
-        /*                 vec[0] = i; */
-        /*                 vec[1] = j; */
-        /*                 assert(abs(expected_res[i][j] - ndvector_get(ed->curr_solve,vec)) < 0.1); */
-        /*         } */
-
-        /* } */
         int cnt_vertices = 7;
         int dims = 2;
 
@@ -101,7 +60,7 @@ static void test_fsm()
                 init_u[i] = INFINITY;
         }
         init_u[0] = 0;
-        
+
         coords[0][0] = 0;
         coords[0][1] = 0;
         coords[1][0] = 1;
@@ -116,16 +75,7 @@ static void test_fsm()
         coords[5][1] = -2*cos(M_PI/6);
         coords[6][0] = 1;
         coords[6][1] = -2*cos(M_PI/6);
-        /* coords[7][0] = -1; */
-        /* coords[7][1] = 0; */
-        /* coords[8][0] = -sin(M_PI/6);; */
-        /* coords[8][1] = cos(M_PI/6);; */
-        /* coords[9][0] = sin(M_PI/6); */
-        /* coords[9][1] = cos(M_PI/6); */
-        /* coords[10][0] =  2; */
-        /* coords[10][1] = 0; */
 
-        
         struct graph* mesh = make_graph(cnt_vertices,dims, coords, values,init_u);
         mesh->vertices[0].ux = 0;
         triag_mesh(mesh);
@@ -135,10 +85,6 @@ static void test_fsm()
                 struct vertex* v = &mesh->vertices[i];
                 printf("[% 4.2lf % 4.2lf] = %lf\n", v->coords[0],v->coords[1],v->ux);
         }
-        
-        /* double answers[cnt_vertices]= */
-        /*         {} */
-        
 }
 
 void test_sort_for_sweep ()
@@ -156,7 +102,6 @@ void test_sort_for_sweep ()
                 values[i] = 1;
         }
 
-        
         coords[0][0] = 0;
         coords[0][1] = 0;
         coords[1][0] = 1;
@@ -178,14 +123,14 @@ void test_sort_for_sweep ()
                 sweep[i]=i;
         sort(cnt_vertices,0.5,0.5,mesh->vertices, sweep);
         printf("sorted ids for ref[0.5,0.5]\n");
-        
+
         for(int i = 0; i < cnt_vertices;i++)
                 printf("%d\n", sweep[i]);
         for(int i = 0; i < cnt_vertices;i++)
                 sweep[i]=i;
         sort(cnt_vertices,2,0,mesh->vertices, sweep);
         printf("sorted ids for ref[2,0]\n");
-        
+
         for(int i = 0; i < cnt_vertices;i++)
                 printf("%d ", sweep[i]);
         printf("\n");
@@ -206,7 +151,7 @@ void test_triangulation()
                 coords[i] = malloc(sizeof(double)* 2);
                 values[i] = 1;
         }
-       
+
         coords[0][0] = 0;
         coords[0][1] = 0;
         coords[1][0] = 1;
@@ -224,7 +169,7 @@ void test_triangulation()
 
         struct graph* mesh = make_graph(cnt_vertices,dims, coords, values,init_u);
         triag_mesh(mesh);
-        
+
         assert(graph_is_connected(mesh, 0,1));
         assert(graph_is_connected(mesh, 0,2));
         assert(graph_is_connected(mesh, 0,3));
@@ -255,10 +200,6 @@ void test_triangulation()
 
 int main(int argc, char *argv[])
 {
-        /* test_set_sweep_dirs(); */
-        /* test_sweep(); */
-
-        /* test_fsm(); */
         test_triangulation();
         test_sort_for_sweep();
         test_fsm();
