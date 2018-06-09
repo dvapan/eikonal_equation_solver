@@ -112,7 +112,9 @@ bool solve_on_sweep(int* sweep, struct graph* mesh)
         double eps = 0.01;
         bool stop = true;
         for(int i = 0; i < mesh->cnt_vertices; i++){
-                double res = solve_ndims(mesh,sweep[i]);
+                /* double res = solve_ndims(mesh,sweep[i]); */
+                double res = solve_anis(mesh,sweep[i]);
+
                 if ((mesh->vertices[sweep[i]].ux-res) > eps) {
                         mesh->vertices[sweep[i]].ux = res;
                         stop = false;
@@ -120,7 +122,9 @@ bool solve_on_sweep(int* sweep, struct graph* mesh)
         }
 
         for(int i = mesh->cnt_vertices - 1; i >=0 ; i--){
-                double res = solve_ndims(mesh,sweep[i]);
+                /* double res = solve_ndims(mesh,sweep[i]); */
+                double res = solve_anis(mesh,sweep[i]);
+
                 if ((mesh->vertices[sweep[i]].ux-res) > eps) {
                         mesh->vertices[sweep[i]].ux = res;
                         stop = false;
@@ -138,10 +142,10 @@ void fsm(struct graph* mesh)
         /* FIXME: ref_point loaded from file */
         ref_points[0][0] = 0;
         ref_points[0][1] = 0;
-        ref_points[1][0] = 5;
+        ref_points[1][0] = 20;
         ref_points[1][1] = 1;
         ref_points[2][0] = 3;
-        ref_points[2][1] = 6;
+        ref_points[2][1] = 60;
 
         int** sweep = malloc(sizeof(int)*cnt_pt_ref);
         for(int i = 0; i<cnt_pt_ref; i++){

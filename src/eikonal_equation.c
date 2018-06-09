@@ -85,3 +85,66 @@ double solve_ndims(struct graph* mesh, int id)
 
 }
 
+
+
+double vg(struct vertex* C, struct vertex* A, struct vertex* B, double s, double* value)
+{
+        double Ax = A->coords[0], Ay = A->coords[1];
+        double Bx = B->coords[0], By = B->coords[1];
+        double Cx = C->coords[0], Cy = C->coords[1];
+        double F_s_x= Ax*s + Bx*(1-s);
+        double F_s_y= Ay*s + By*(1-s);
+        double e_x = Cx  - F_s_x, e_y = Cy - F_s_y;
+        double len = sqrt(e_x*e_x+e_y*e_y);
+        e_x/=len;e_y/=len;
+        return sqrt(pow(e_x*(value[0]+value[2]),2) +pow(e_y*(value[1]+value[2]),2));
+}
+
+                    
+double solve_anis(struct graph* mesh, int id)
+{
+        double value[4] = {1,0,0,2};
+        double min_ux = INFINITY;
+        struct vertex* v = &mesh->vertices[id];
+        struct link* ngbrs = graph_get_neighbours(mesh,id);
+        int cnt_known = 0; int id_known = -1;
+        for(struct link* t = ngbrs; t != NULL; t = t->next){
+                for (struct link* r = t; r != NULL; r = r->next){
+                        struct vertex* v1 = t->vertex;
+                        struct vertex* v2 = r->vertex;
+                        double new_ux;
+                        double a,b,c,al,bt;
+                        set_triangle(v,v1,v2,&a,&b,&c,&al,&bt);
+
+                        if (isfinite(t->vertex->ux) && isfinite(r->vertex->ux)){
+                                for (double s = 0; s<=1;s+=0.1){
+                                        double ds = sqrt(b*b+c*c*s*s-2*b*c*s*cos(al));
+                                        new_ux = s*v2->ux + (1-s)*v1->ux + ds/vg(v, v1,v2,s,value);
+                                        /* printf("%lf,%lf :: %lf, %lf: %lf\n",ux ); */
+                                        if (new_ux< min_ux)
+                                                min_ux = new_ux;
+                                }
+                        } else if (isfinite(t->vertex->ux))
+                        {
+                                double ds = sqrt(b*b+c*c*-2*b*c*cos(al));
+                                new_ux = v1->ux + ds/vg(v, v1,v2,0,value);
+
+
+                        } else if (isfinite(r->vertex->ux))
+                        {
+                                double ds = sqrt(b*b);
+                                new_ux = v2->ux + ds/vg(v, v1,v2,1,value);
+                        }
+                        else
+                                continue;
+                        if (new_ux < min_ux)
+                                min_ux = new_ux;
+
+
+                }
+        }
+        return min_ux;
+
+}
+
+

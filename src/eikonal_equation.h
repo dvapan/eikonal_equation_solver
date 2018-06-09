@@ -16,6 +16,8 @@
 
 /* int eikonal_data_dims(struct eikonal_data *ed); */
 double solve_ndims(struct graph *mesh, int id);
+double solve_anis(struct graph* mesh, int id);
+
 /* double solve_eikonal(struct eikonal_data *ed,size_t *pos); */
 
 

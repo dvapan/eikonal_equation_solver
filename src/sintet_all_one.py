@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import scipy as sc
+import scipy as sc 
 import math
 
 data = []
@@ -8,8 +8,8 @@ img = []
 
 
 r = 9
-x0,y0 = 2,2
-dimx,dimy = 10,10
+x0,y0 = 25,25
+dimx,dimy = 50,50
 for y in range(dimy):
     line = []
     for x in range(dimx):
